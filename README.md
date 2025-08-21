@@ -181,7 +181,7 @@ PRs and issues welcome!
 
 ## License
 
-MIT
+Apache 2.0
 
 ---
 
