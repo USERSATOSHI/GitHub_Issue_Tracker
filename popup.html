@@ -1,0 +1,393 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <style>
+            body {
+                width: 350px;
+                padding: 16px;
+                font-family:
+                    -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+                margin: 0;
+            }
+
+            .header {
+                display: flex;
+                align-items: center;
+                margin-bottom: 16px;
+                padding-bottom: 12px;
+                border-bottom: 1px solid #e1e4e8;
+            }
+
+            .header h1 {
+                font-size: 16px;
+                margin: 0;
+                color: #24292e;
+            }
+
+            .status {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 16px;
+                padding: 8px 12px;
+                border-radius: 6px;
+                font-size: 14px;
+            }
+
+            .status.connected {
+                background: #d4edda;
+                color: #155724;
+                border: 1px solid #c3e6cb;
+            }
+
+            .status.disconnected {
+                background: #f8d7da;
+                color: #721c24;
+                border: 1px solid #f5c6cb;
+            }
+
+            .status-indicator {
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+            }
+
+            .status.connected .status-indicator {
+                background: #28a745;
+            }
+
+            .status.disconnected .status-indicator {
+                background: #dc3545;
+            }
+
+            .form-group {
+                margin-bottom: 16px;
+            }
+
+            .form-group label {
+                display: block;
+                font-size: 12px;
+                font-weight: 600;
+                color: #24292e;
+                margin-bottom: 4px;
+            }
+
+            .form-group input,
+            .form-group select {
+                width: 100%;
+                padding: 8px 12px;
+                border: 1px solid #d1d5da;
+                border-radius: 6px;
+                font-size: 14px;
+                box-sizing: border-box;
+            }
+
+            .form-group input:focus,
+            .form-group select:focus {
+                border-color: #0366d6;
+                outline: none;
+                box-shadow: 0 0 0 3px rgba(3, 102, 214, 0.1);
+            }
+
+            .button {
+                padding: 8px 16px;
+                border: none;
+                border-radius: 6px;
+                font-size: 14px;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+
+            .button.primary {
+                background: #0366d6;
+                color: white;
+            }
+
+            .button.primary:hover {
+                background: #0256cc;
+            }
+
+            .button.secondary {
+                background: #fafbfc;
+                color: #24292e;
+                border: 1px solid #d1d5da;
+            }
+
+            .button.secondary:hover {
+                background: #f3f4f6;
+            }
+
+            .button:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+            }
+
+            .tabs {
+                display: flex;
+                margin-bottom: 16px;
+                border-bottom: 1px solid #e1e4e8;
+            }
+
+            .tab {
+                padding: 8px 16px;
+                background: none;
+                border: none;
+                cursor: pointer;
+                font-size: 14px;
+                color: #586069;
+                border-bottom: 2px solid transparent;
+            }
+
+            .tab.active {
+                color: #24292e;
+                border-bottom-color: #0366d6;
+            }
+
+            .tab-content {
+                display: none;
+            }
+
+            .tab-content.active {
+                display: block;
+            }
+
+            .processed-issues {
+                max-height: 200px;
+                overflow-y: auto;
+            }
+
+            .issue-item {
+                padding: 8px 12px;
+                border: 1px solid #e1e4e8;
+                border-radius: 6px;
+                margin-bottom: 8px;
+                font-size: 12px;
+            }
+
+            .issue-title {
+                font-weight: 600;
+                color: #24292e;
+                margin-bottom: 4px;
+            }
+
+            .issue-meta {
+                color: #586069;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .issue-status {
+                padding: 2px 6px;
+                border-radius: 12px;
+                font-size: 10px;
+                font-weight: 500;
+            }
+
+            .issue-status.todo {
+                background: #fff3cd;
+                color: #856404;
+            }
+
+            .issue-status.in-progress {
+                background: #d1ecf1;
+                color: #0c5460;
+            }
+
+            .issue-status.done {
+                background: #d4edda;
+                color: #155724;
+            }
+
+            .empty-state {
+                text-align: center;
+                color: #586069;
+                font-size: 14px;
+                padding: 32px 16px;
+            }
+
+            .emoji-config {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+                margin-bottom: 16px;
+            }
+
+            .help-text {
+                font-size: 12px;
+                color: #586069;
+                margin-top: 4px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1>🐙 GitHub Issue Tracker</h1>
+        </div>
+
+        <div id="status" class="status disconnected">
+            <div class="status-indicator"></div>
+            <span id="status-text">Not configured</span>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" data-tab="settings">Settings</button>
+            <button class="tab" data-tab="activity">Activity</button>
+        </div>
+
+        <div id="settings-tab" class="tab-content active">
+            <div class="form-group">
+                <label for="github-token">GitHub Personal Access Token</label>
+                <input
+                    type="password"
+                    id="github-token"
+                    placeholder="ghp_..."
+                />
+                <div class="help-text">
+                    Create at
+                    <a href="https://github.com/settings/tokens" target="_blank"
+                        >github.com/settings/tokens</a
+                    >
+                    <br />Needs: repo, read:project permissions
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="project-owner">Project Owner</label>
+                <input
+                    type="text"
+                    id="project-owner"
+                    placeholder="your-username"
+                />
+            </div>
+
+            <div class="form-group">
+                <label for="project-number">Project Number</label>
+                <input type="number" id="project-number" placeholder="1" />
+                <div class="help-text">
+                    Found in your project URL: /users/owner/projects/NUMBER
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="project-id">Project ID</label>
+                <input
+                    type="text"
+                    id="project-id"
+                    placeholder="Paste Project node ID (e.g. PVT_xxx...)"
+                />
+                <div class="help-text">
+                    For GitHub Projects (beta): This is the node ID for your
+                    project (e.g.,
+                    <code>PVT_xxx</code>).<br />
+                    Find this using the GitHub GraphQL API.
+                </div>
+            </div>
+
+            <div class="emoji-config">
+                <div class="form-group">
+                    <label>Todo Emoji</label>
+                    <input
+                        type="text"
+                        id="todo-emoji"
+                        value="📌"
+                        maxlength="2"
+                    />
+                </div>
+                <div class="form-group">
+                    <label>In Progress Emoji</label>
+                    <input
+                        type="text"
+                        id="progress-emoji"
+                        value="🚀"
+                        maxlength="2"
+                    />
+                </div>
+                <div class="form-group">
+                    <label>Done Emoji</label>
+                    <input
+                        type="text"
+                        id="done-emoji"
+                        value="✅"
+                        maxlength="2"
+                    />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="todo-column-id">Todo Column ID</label>
+                <input
+                    type="text"
+                    id="todo-column-id"
+                    placeholder="Paste Todo column ID"
+                />
+                <div class="help-text">
+                    Find this using the GitHub API or inspect your project board
+                    columns.
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="inprogress-column-id">In Progress Column ID</label>
+                <input
+                    type="text"
+                    id="inprogress-column-id"
+                    placeholder="Paste In Progress column ID"
+                />
+                <div class="help-text">
+                    Find this using the GitHub API or inspect your project board
+                    columns.
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="done-column-id">Done Column ID</label>
+                <input
+                    type="text"
+                    id="done-column-id"
+                    placeholder="Paste Done column ID"
+                />
+                <div class="help-text">
+                    Find this using the GitHub API or inspect your project board
+                    columns.
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="status-field-id">Status Field ID</label>
+                <input
+                    type="text"
+                    id="status-field-id"
+                    placeholder="Paste Status field ID"
+                />
+                <div class="help-text">
+                    For GitHub Projects (beta): This is the field ID for your
+                    Status field (e.g.,
+                    <code>PVTSSF_xxxx</code>). <br />Find this using the GitHub
+                    GraphQL API.
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 8px">
+                <button id="test-token" class="button secondary">
+                    Test Token
+                </button>
+                <button id="save-settings" class="button primary">
+                    Save Settings
+                </button>
+            </div>
+        </div>
+
+        <div id="activity-tab" class="tab-content">
+            <div id="processed-issues" class="processed-issues">
+                <div class="empty-state">
+                    No issues processed yet.<br />
+                    React to issues with your configured emojis to see them
+                    here.
+                </div>
+            </div>
+        </div>
+
+        <script src="popup.js"></script>
+    </body>
+</html>

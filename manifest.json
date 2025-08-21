@@ -1,0 +1,33 @@
+{
+    "manifest_version": 3,
+    "name": "GitHub Issue Tracker",
+    "version": "1.0",
+    "description": "Automatically move GitHub issues to your project board when you react with specific emojis",
+    "permissions": [
+        "storage",
+        "activeTab",
+        "https://api.github.com/*",
+        "https://github.com/*"
+    ],
+    "host_permissions": ["https://github.com/*", "https://api.github.com/*"],
+    "background": {
+        "service_worker": "background.js"
+    },
+    "content_scripts": [
+        {
+            "matches": ["https://github.com/*/issues/*"],
+            "js": ["content.js"],
+            "run_at": "document_end"
+        }
+    ],
+    "action": {
+        "default_popup": "popup.html",
+        "default_title": "GitHub Issue Tracker"
+    },
+    "web_accessible_resources": [
+        {
+            "resources": ["injected.js"],
+            "matches": ["https://github.com/*"]
+        }
+    ]
+}
