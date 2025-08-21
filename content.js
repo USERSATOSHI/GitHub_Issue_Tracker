@@ -6,6 +6,9 @@
     let TODO_EMOJI = "👀";
     let IN_PROGRESS_EMOJI = "🚀";
     let DONE_EMOJI = "✅";
+    // Per-repo whitelist (owner/repo strings) and apply-to-all flag
+    let ALLOWED_REPOS = [];
+    let APPLY_TO_ALL = false; // default false
 
     // Extract issue information from the current page
     function getIssueInfo() {
@@ -43,11 +46,7 @@
         // aria-checked="true" means *you* have reacted
         const isMine = reactionButton.getAttribute("aria-checked") === "true";
 
-        console.log("[GitHub Issue Tracker] Comparing emoji:", {
-            emojiText,
-            emojiConfig,
-            isMine,
-        });
+    // debug log removed: Comparing emoji
         return emojiText === emojiConfig && isMine;
     }
 
@@ -119,10 +118,8 @@
             else if (reactions.todo) targetStatus = "Todo";
 
             if (targetStatus) {
-                console.log(
-                    "[GitHub Issue Tracker] Sending ADD_TO_PROJECT message:",
-                    { issueInfo, targetStatus },
-                );
+                // Only proceed if repo is allowed or apply-to-all is set
+                if (!isRepoAllowed(issueInfo)) return;
 
                 chrome.runtime.sendMessage(
                     {
@@ -131,18 +128,19 @@
                         targetStatus,
                     },
                     (response) => {
-                        console.log(
-                            "[GitHub Issue Tracker] Background response to ADD_TO_PROJECT:",
-                            response,
-                        );
+                        // background response intentionally ignored
                     },
                 );
             } else {
-                console.log(
-                    "[GitHub Issue Tracker] No relevant reactions detected for this user.",
-                );
+                // debug log removed: no relevant reactions detected
             }
         }
+    }
+
+    function isRepoAllowed(issueInfo) {
+        if (APPLY_TO_ALL) return true;
+        const id = `${issueInfo.owner}/${issueInfo.repo}`;
+        return ALLOWED_REPOS.some(x => x.toLowerCase() === id.toLowerCase());
     }
 
     // Initialize when page loads
@@ -152,10 +150,8 @@
         );
         if (!toolbar) return;
 
-        const observer = new MutationObserver(() => {
-            console.log(
-                "[GitHub Issue Tracker] Reactions toolbar changed, re-checking reactions.",
-            );
+            const observer = new MutationObserver(() => {
+            // debug log removed: reactions toolbar changed
             debouncedCheckReactions();
             setupReactionMonitor(); // re-attach listeners if needed
         });
@@ -166,35 +162,33 @@
     function initialize() {
         // Load emoji settings from chrome.storage.sync
         chrome.storage.sync.get(
-            ["todoEmoji", "progressEmoji", "doneEmoji"],
+            ["todoEmoji", "progressEmoji", "doneEmoji", "allowedRepos", "applyToAll"],
             (result) => {
                 TODO_EMOJI = result.todoEmoji || "👀";
                 IN_PROGRESS_EMOJI = result.progressEmoji || "🚀";
                 DONE_EMOJI = result.doneEmoji || "✅";
-                console.log("[GitHub Issue Tracker] Loaded emoji config:", {
-                    TODO_EMOJI,
-                    IN_PROGRESS_EMOJI,
-                    DONE_EMOJI,
-                });
+                ALLOWED_REPOS = Array.isArray(result.allowedRepos) ? result.allowedRepos : [];
+                APPLY_TO_ALL = !!result.applyToAll;
 
                 if (window.location.pathname.includes("/issues/")) {
-                    console.log(
-                        "[GitHub Issue Tracker] Initializing on issue page:",
-                        window.location.pathname,
-                    );
                     setupReactionMonitor();
                     debouncedCheckReactions(); // Check existing reactions on page load
                     observeReactionsToolbar();
                     observeReactionButtonStates();
-                } else {
-                    console.log(
-                        "[GitHub Issue Tracker] Not an issue page:",
-                        window.location.pathname,
-                    );
                 }
             },
         );
     }
+
+    // Watch for settings changes so the content script updates immediately
+    chrome.storage.onChanged.addListener((changes, area) => {
+        if (area !== "sync") return;
+        if (changes.todoEmoji) TODO_EMOJI = changes.todoEmoji.newValue || TODO_EMOJI;
+        if (changes.progressEmoji) IN_PROGRESS_EMOJI = changes.progressEmoji.newValue || IN_PROGRESS_EMOJI;
+        if (changes.doneEmoji) DONE_EMOJI = changes.doneEmoji.newValue || DONE_EMOJI;
+        if (changes.allowedRepos) ALLOWED_REPOS = Array.isArray(changes.allowedRepos.newValue) ? changes.allowedRepos.newValue : ALLOWED_REPOS;
+        if (changes.applyToAll) APPLY_TO_ALL = !!changes.applyToAll.newValue;
+    });
 
     // Observe aria-checked changes on reaction buttons to detect user reactions to existing emojis
     function observeReactionButtonStates() {
@@ -212,9 +206,7 @@
                 ) {
                     const button = mutation.target;
                     if (button.getAttribute("aria-checked") === "true") {
-                        console.log(
-                            "[GitHub Issue Tracker] aria-checked changed to true on button, re-checking reactions.",
-                        );
+                        // debug log removed: aria-checked changed to true
                         checkReactions();
                     }
                 }
@@ -253,15 +245,11 @@
         }
     }).observe(document, { subtree: true, childList: true });
 
-    // Log for debugging
-    console.log("GitHub Issue Tracker extension loaded");
+    // Log for debugging removed
 
     // Listen for toast feedback from background
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-        console.log(
-            "[GitHub Issue Tracker] Received message from background:",
-            message,
-        );
+    // debug log removed: received message from background
         if (message.type === "SHOW_TOAST") {
             showToast(`Issue moved to <b>${message.status}</b> column!`, 3500);
         }

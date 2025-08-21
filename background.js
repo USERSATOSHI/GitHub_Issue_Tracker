@@ -8,10 +8,7 @@ class GitHubTracker {
     setupMessageListener() {
         chrome.runtime.onMessage.addListener(
             (message, sender, sendResponse) => {
-                console.log(
-                    "[GitHub Issue Tracker][background] Received message:",
-                    message,
-                );
+                // console.log removed
 
                 if (message.type === "REACTION_DETECTED") {
                     this.handleReaction(message.issueInfo, message.reactions);
@@ -40,10 +37,6 @@ class GitHubTracker {
 
     async addIssueExplicitly(issueInfo, status) {
         const settings = await this.getSettings();
-        console.log(
-            "[GitHub Issue Tracker][background] addIssueExplicitly called with:",
-            { issueInfo, status, settings },
-        );
 
         if (
             !settings.githubToken ||
@@ -67,23 +60,15 @@ class GitHubTracker {
             };
         }
 
-        try {
-            // Add issue to project
-            console.log(
-                "[GitHub Issue Tracker][background] Adding issue to project:",
-                {
-                    issueInfo,
-                    optionId,
-                    settings,
-                },
-            );
+            try {
+            // debug log removed: adding issue to project
             const addResult = await this.addIssueToProject(
                 issueInfo,
                 optionId,
                 settings,
             );
 
-            console.log({ addResult });
+            // debug log removed: addResult
 
             const itemId =
                 addResult?.data?.updateProjectV2ItemFieldValue?.projectV2Item
@@ -109,8 +94,8 @@ class GitHubTracker {
                 });
             }
             return { success: true, itemId, status };
-        } catch (err) {
-            console.error("Error in addIssueExplicitly:", err);
+            } catch (err) {
+            // console.error removed: Error in addIssueExplicitly
             return { success: false, error: err.message };
         }
     }
@@ -128,12 +113,14 @@ class GitHubTracker {
             "doneEmoji",
             "statusFieldId",
             "projectId",
+			"allowedRepos",
+			"applyToAll"
         ]);
         return result;
     }
 
     async saveSettings(settings) {
-        console.log({ settings });
+        // debug log removed: settings
         await chrome.storage.sync.set(settings);
     }
 
@@ -161,17 +148,14 @@ class GitHubTracker {
         try {
             const settings = await this.getSettings();
 
-            console.log(
-                "[GitHub Issue Tracker][background] handleReaction called with:",
-                { issueInfo, reactions, settings },
-            );
+            // debug log removed: handleReaction called with issueInfo, reactions, settings
 
             if (
                 !settings.githubToken ||
                 !settings.projectOwner ||
                 !settings.projectNumber
             ) {
-                console.log("GitHub Tracker: Settings not configured");
+                // debug log removed: settings not configured
                 return;
             }
 
@@ -190,10 +174,7 @@ class GitHubTracker {
                 status = "Todo";
             }
 
-            console.log("[GitHub Issue Tracker][background] Reaction status:", {
-                targetColumnId,
-                status,
-            });
+            // debug log removed: reaction status
 
             if (targetColumnId) {
                 await this.moveIssueToProject(
@@ -203,13 +184,10 @@ class GitHubTracker {
                     settings,
                 );
             } else {
-                console.log(
-                    "[GitHub Issue Tracker][background] No target column matched for reactions:",
-                    reactions,
-                );
+                // debug log removed: no target column matched for reactions
             }
         } catch (error) {
-            console.error("GitHub Tracker error:", error);
+            // console.error removed: GitHub Tracker error
         }
     }
 
@@ -226,9 +204,7 @@ class GitHubTracker {
                 // Update existing item (set status field)
                 itemId = existingItem.id;
                 await this.updateProjectItem(itemId, columnId, settings);
-                console.log(
-                    `Moved issue #${issueInfo.issueNumber} to ${status}`,
-                );
+                // debug log removed: moved issue to status
             } else {
                 // Add new item to project
                 const addResult = await this.addIssueToProject(
@@ -238,9 +214,7 @@ class GitHubTracker {
                 );
                 // Try to extract itemId from GraphQL response
                 itemId = addResult?.data?.addProjectV2ItemById?.item?.id;
-                console.log(
-                    `Added issue #${issueInfo.issueNumber} to project in ${status}`,
-                );
+                // debug log removed: added issue to project
             }
 
             // For GitHub Projects (beta): Set the Status field if statusFieldId is present
@@ -252,14 +226,12 @@ class GitHubTracker {
                     columnId,
                     settings,
                 );
-                console.log(
-                    `Set status field for issue #${issueInfo.issueNumber} to ${status}`,
-                );
+                // debug log removed: set status field for issue
             }
 
             // Store in local storage for popup display
             await this.storeProcessedIssue(issueInfo, status);
-            console.log({ issueInfo });
+            // debug log removed: issueInfo
             // Send feedback to content script (toast)
             // Find the tab with the issue URL and send a message
             if (chrome && chrome.tabs && issueInfo.url) {
@@ -274,7 +246,7 @@ class GitHubTracker {
                 });
             }
         } catch (error) {
-            console.error("Error moving issue to project:", error);
+            // console.error removed: Error moving issue to project
         }
     }
 
@@ -314,7 +286,7 @@ class GitHubTracker {
 
         const addResult = await addResponse.json();
         if (addResult.errors) {
-            console.error("Error adding issue to project:", addResult.errors);
+            // console.error removed: Error adding issue to project
             return addResult;
         }
 
@@ -364,7 +336,7 @@ class GitHubTracker {
         );
 
         const issue = await response.json();
-        console.log({ issue });
+    // debug log removed: issue
         return issue.node_id;
     }
 

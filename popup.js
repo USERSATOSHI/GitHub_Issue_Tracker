@@ -53,7 +53,7 @@ class PopupManager {
     async loadSettings() {
         try {
             const settings = await this.sendMessage({ type: "GET_SETTINGS" });
-            console.log("Loaded settings:", settings);
+            // debug log removed: loaded settings
 
             if (settings.githubToken) {
                 document.getElementById("github-token").value =
@@ -88,6 +88,13 @@ class PopupManager {
                     settings.doneEmoji;
             }
 
+            // Load allowed repos and apply-to-all
+            if (settings.allowedRepos) {
+                document.getElementById("allowed-repos").value =
+                    settings.allowedRepos.join("\n");
+            }
+            document.getElementById("apply-to-all").checked = !!settings.applyToAll;
+
             // Load column IDs if saved
             if (settings.todoColumnId) {
                 document.getElementById("todo-column-id").value =
@@ -110,7 +117,7 @@ class PopupManager {
 
             this.updateStatus(settings);
         } catch (error) {
-            console.error("Error loading settings:", error);
+            // console.error removed: Error loading settings
         }
     }
 
@@ -128,8 +135,14 @@ class PopupManager {
             doneColumnId: document.getElementById("done-column-id").value,
             statusFieldId: document.getElementById("status-field-id").value,
             projectId: document.getElementById("project-id").value,
+            allowedRepos: document
+                .getElementById("allowed-repos")
+                .value.split(/\r?\n/)
+                .map((s) => s.trim())
+                .filter(Boolean),
+            applyToAll: document.getElementById("apply-to-all").checked,
         };
-        console.log({ settings });
+        // debug log removed: settings
 
         try {
             await this.sendMessage({ type: "SAVE_SETTINGS", settings });
@@ -148,7 +161,7 @@ class PopupManager {
 
             this.updateStatus(settings);
         } catch (error) {
-            console.error("Error saving settings:", error);
+            // console.error removed: Error saving settings
         }
     }
 
@@ -245,7 +258,7 @@ class PopupManager {
                 )
                 .join("");
         } catch (error) {
-            console.error("Error loading processed issues:", error);
+            // console.error removed: Error loading processed issues
         }
     }
 

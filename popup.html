@@ -368,6 +368,27 @@
                 </div>
             </div>
 
+            <div class="form-group">
+                <label for="allowed-repos">Allowed repositories (one per line)</label>
+                <textarea
+                    id="allowed-repos"
+                    placeholder="owner/repo (e.g. octocat/hello-world)"
+                    style="width:100%; height:80px; padding:8px 12px; border:1px solid #d1d5da; border-radius:6px; box-sizing:border-box;"
+                ></textarea>
+                <div class="help-text">
+                    Only issues from the listed repositories will be tracked
+                    (one <code>owner/repo</code> per line). Check "Apply to all"
+                    to disable filtering.
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="apply-to-all" />
+                    Apply to all repositories (disable per-repo filtering)
+                </label>
+            </div>
+
             <div style="display: flex; gap: 8px">
                 <button id="test-token" class="button secondary">
                     Test Token
