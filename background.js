@@ -43,6 +43,11 @@ class GitHubTracker {
 		if (status === 'Todo') optionId = settings.todoColumnId;
 		else if (status === 'In Progress') optionId = settings.inProgressColumnId;
 		else if (status === 'Done') optionId = settings.doneColumnId;
+		const orderIds = [
+			settings.todoColumnId,
+			settings.inProgressColumnId,
+			settings.doneColumnId,
+		];
 
 		if (!optionId) {
 			return {
@@ -57,7 +62,10 @@ class GitHubTracker {
 
 			if (existingItem) {
 				// If existingItem is in same status, no need to update
-				if (existingItem.content && existingItem.currentStatusOptionId === optionId) {
+				if (
+					existingItem.content &&
+					orderIds[existingItem.currentStatusOptionId] >= orderIds[optionId]
+				) {
 					return {
 						success: true,
 						itemId: existingItem.id,
