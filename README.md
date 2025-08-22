@@ -1,4 +1,3 @@
-
 # GitHub Issue Tracker Extension
 
 Automatically move GitHub issues to your project board columns when you react with specific emojis.
@@ -50,56 +49,60 @@ Click the GitHub Issue Tracker icon in your browser toolbar.
   The node ID of your project (e.g., `PVT_xxx`).
   _How to get it:_
   Use the GitHub GraphQL Explorer with:
-  ```graphql
-  query {
-    user(login: "YOUR_USERNAME") {
-      projectV2(number: YOUR_PROJECT_NUMBER) {
-        id
-      }
+
+    ```graphql
+    query {
+    	user(login: "YOUR_USERNAME") {
+    		projectV2(number: YOUR_PROJECT_NUMBER) {
+    			id
+    		}
+    	}
     }
-  }
-  ```
-  Replace `YOUR_USERNAME` and `YOUR_PROJECT_NUMBER`.
-  Copy the returned `id` value.
+    ```
+
+    Replace `YOUR_USERNAME` and `YOUR_PROJECT_NUMBER`.
+    Copy the returned `id` value.
 
 - **Status Field ID:**
   The node ID of your "Status" field (e.g., `PVTSSF_xxx`).
   _How to get it:_
   Use the GraphQL Explorer:
-  ```graphql
-  query {
-    node(id: "YOUR_PROJECT_ID") {
-      ... on ProjectV2 {
-        fields(first: 20) {
-          nodes {
-            ... on ProjectV2FieldCommon {
-              id
-              name
-            }
-          }
-        }
-      }
+
+    ```graphql
+    query {
+    	node(id: "YOUR_PROJECT_ID") {
+    		... on ProjectV2 {
+    			fields(first: 20) {
+    				nodes {
+    					... on ProjectV2FieldCommon {
+    						id
+    						name
+    					}
+    				}
+    			}
+    		}
+    	}
     }
-  }
-  ```
-  Find the field named "Status" and copy its `id`.
+    ```
+
+    Find the field named "Status" and copy its `id`.
 
 - **Todo/In Progress/Done Column IDs:**
   These are the option IDs for your Status field.
   _How to get them:_
   In the same query above, find the "Status" field, then look for its `options`:
-  ```json
-  {
-    "name": "Status",
-    "id": "PVTSSF_xxx",
-    "options": [
-      { "id": "aaa", "name": "Todo" },
-      { "id": "bbb", "name": "In Progress" },
-      { "id": "ccc", "name": "Done" }
-    ]
-  }
-  ```
-  Use these IDs for the corresponding columns.
+    ```json
+    {
+    	"name": "Status",
+    	"id": "PVTSSF_xxx",
+    	"options": [
+    		{ "id": "aaa", "name": "Todo" },
+    		{ "id": "bbb", "name": "In Progress" },
+    		{ "id": "ccc", "name": "Done" }
+    	]
+    }
+    ```
+    Use these IDs for the corresponding columns.
 
 #### **Emoji Settings**
 
@@ -140,16 +143,16 @@ Suppose your project has:
 
 Fill the popup as follows:
 
-| Field                | Value                                  |
-|----------------------|----------------------------------------|
-| Project ID           | PVT_xxx                                |
-| Status Field ID      | PVTSSF_xxx                             |
-| Todo Column ID       | aaa                                    |
-| In Progress Column ID| bbb                                    |
-| Done Column ID       | ccc                                    |
-| Todo Emoji           | 👀                                     |
-| In Progress Emoji    | 🚀                                     |
-| Done Emoji           | ✅                                     |
+| Field                 | Value      |
+| --------------------- | ---------- |
+| Project ID            | PVT_xxx    |
+| Status Field ID       | PVTSSF_xxx |
+| Todo Column ID        | aaa        |
+| In Progress Column ID | bbb        |
+| Done Column ID        | ccc        |
+| Todo Emoji            | 👀         |
+| In Progress Emoji     | 🚀         |
+| Done Emoji            | ✅         |
 
 ---
 
